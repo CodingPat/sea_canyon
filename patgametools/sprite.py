@@ -4,8 +4,9 @@ class Sprite():
     def __init__(self,x,y,image):
         self.x=x
         self.y=y
+        self.dx=0
+        self.dy=0
         self.surface=pygame.image.load(image).convert_alpha()
-        print("surface rect : {}".format(self.surface.get_rect()))
         self.hauteur=self.surface.get_height()
         self.largeur=self.surface.get_width()
         self.rect=pygame.rect.Rect(self.x,self.y,self.largeur,self.hauteur)
@@ -56,18 +57,29 @@ class SpriteAnime(Sprite):
         self.surfacedict={}
         self.creersurfacedict()
         self.setanimation(self.animation)
+        self.estdelaianimation=False#existe-t-il un délai pour l'animation en cours ?
+        self.delaiencoursanimation=None#temps déjà passé de l'animation 
+        self.delaimaximumanimation=0#temps maximum pour l'animation
+        self.horlogeanimation=None#horloge pour suivre le temps d'animation
         
-    def setanimation(self,animation):
+        
+    def setanimation(self,animation,delai=None):
         self.animation=animation
         self.subsurfacenr=0
         self.maxsubsurfaces=len(self.surfacedict[animation])
         self.set_surface()
+        if delai:
+            self.estdelaianimation=True
+            self.delaiencoursanimation=0
+            self.delaimaximumanimation=delai
+            self.horlogeanimation=pygame.time.Clock()
         
     
     def set_surface(self):
         self.surface=self.surfacedict[self.animation][self.subsurfacenr]
         self.hauteur=self.surface.get_height()
         self.largeur=self.surface.get_width()
+        self.rect=pygame.rect.Rect(self.x,self.y,self.largeur,self.hauteur)
     
     def dessiner(self,surface):
         
@@ -75,8 +87,19 @@ class SpriteAnime(Sprite):
         print("subsurfacenr:{}".format(self.subsurfacenr))
         print("animation:{},subsurface:{}".format(self.animation,self.surfacedict[self.animation][self.subsurfacenr]))
         print("surface:{}",self.surface)
+        print("rect : {}", self.rect)
         surface.blit(self.surface,self.rect.topleft)
         
+        #vérifier le timer d'animation. Si temps écoulé, basculer vers l'animation par défaut
+        if self.estdelaianimation:
+            self.delaiencoursanimation+=self.horlogeanimation.tick()
+            if self.delaiencoursanimation>=self.delaimaximumanimation:
+                self.setanimation("default")
+                self.estdelaianimation=False
+        
+        
+        
+        #vérifier le nombre de frames avant de passer à l'image suivante
         self.count+=1
         #print("count: {}".format(self.count))
         if self.count>self.maxcount:

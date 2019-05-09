@@ -3,11 +3,12 @@ import patgametools.sprite as sprite
 
 from pygame.locals import *
 
-class Joueur():
+class Joueur(sprite.SpriteAnime):
     
     
     def __init__(self,x,y,image,rectdict,maxcount,animation="default",vies=3,fichierson=None):
-        self.sprite=sprite.SpriteAnime(x,y,image,rectdict,maxcount)
+        sprite.SpriteAnime.__init__(self,x,y,image,rectdict,maxcount)
+        
         self.dx=5
         self.direction=0 # 0=immobile 1=droite -1=gauche
         self.vies=3
@@ -44,13 +45,7 @@ class Joueur():
             else:
                 self.deplacer(self.direction*self.dx,0)
                 
-        
-        
-    def dessiner(self):
-        #print("dessiner - pas de collision")
-        self.sprite.dessiner()
-        
-
+    
 
 class Paroi(sprite.Sprite):
     
@@ -357,7 +352,7 @@ class MoteurJeu():
                 self.bandeauscore.miseajour()                  
                 #dessiner
                 self.canyon.dessiner()
-                self.joueur.dessiner()
+                self.joueur.dessiner(self.ecran)
                 self.bandeauscore.dessiner()
                 
                                 
@@ -411,12 +406,12 @@ class MoteurJeu():
                 self.clockcollision.tick()
                 self.delaicollision=0
                 
+                self.joueur.setanimation("collision",5000)
+                
                 while self.delaicollision<self.delaicollisionmaximum:
                     self.delaicollision+=self.clockcollision.tick()
                     
-                    """
-                    OPTIONNEL : clignotement du joueur
-                    """
+                    
                 self.reset_position()    
                 self.estecrancollision=False
                 if not(self.joueur.vies>0):
@@ -503,7 +498,7 @@ if __name__=="__main__":
 
     moteurJeu=MoteurJeu(largeurecran,hauteurecran,"Sea canyon !")
     #création du joueur
-    moteurJeu.joueur=Joueur(largeurecran/2,hauteurecran/2,imagejoueur,rectspritejoueur,3,"default",3,sonexplosion)
+    moteurJeu.joueur=Joueur(largeurecran/2,hauteurecran/2,imagejoueur,rectspritejoueur,10,"default",3,sonexplosion)
     moteurJeu.canyon=Canyon("wall.png")
     moteurJeu.bandeauscore=BandeauScore()
     moteurJeu.boucle_principale()
