@@ -39,6 +39,13 @@ class Sprite():
 
 class SpriteAnime(Sprite):
     def __init__(self,x,y,image,rectdict,maxcount,animation="default"):
+        print("SpriteAnime init")
+        print("x,y : {},{}".format(x,y))
+        print("image : {}".format(image))
+        print("rectdict : {}".format(rectdict))
+        print("maxcount : {}".format(maxcount))
+        print("animation : {}".format(animation))
+        
         Sprite.__init__(self,x,y,image)
         self.subsurfacenr=0
         self.maxsubsurfaces=0
@@ -54,18 +61,27 @@ class SpriteAnime(Sprite):
         self.animation=animation
         self.subsurfacenr=0
         self.maxsubsurfaces=len(self.surfacedict[animation])
+        self.set_surface()
         
+    
+    def set_surface(self):
+        self.surface=self.surfacedict[self.animation][self.subsurfacenr]
+        self.hauteur=self.surface.get_height()
+        self.largeur=self.surface.get_width()
+    
     def dessiner(self,surface):
         
-        #print("subsurfacenr:{}".format(self.subsurfacenr))
-        #print(self.surfacedict[self.animation][self.subsurfacenr])
-        
-        surface.blit(self.surfacedict[self.animation][self.subsurfacenr],self.rect.topleft)
+        #debug
+        print("subsurfacenr:{}".format(self.subsurfacenr))
+        print("animation:{},subsurface:{}".format(self.animation,self.surfacedict[self.animation][self.subsurfacenr]))
+        print("surface:{}",self.surface)
+        surface.blit(self.surface,self.rect.topleft)
         
         self.count+=1
         #print("count: {}".format(self.count))
         if self.count>self.maxcount:
             #print("maxcount atteint")
+            self.set_surface()
             self.count=0
             self.subsurfacenr+=1
             if self.subsurfacenr>self.maxsubsurfaces-1:
@@ -75,10 +91,15 @@ class SpriteAnime(Sprite):
         for nomdict in self.rectdict:
             listsurfaces=[]
             for rect in self.rectdict[nomdict]:
-                print(rect)
                 listsurfaces.append(self.surface.subsurface(rect))
-            print(listsurfaces)
+            
             self.surfacedict[nomdict]=listsurfaces
+        #debug
+        print("création dictionnaire des surfaces")
+        for key,value in self.surfacedict.items():
+            print(key,value)
+            
+            
             
             
             
